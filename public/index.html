@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flask Translation API - Live Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .api-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 1.1em;
+        }
+        
+        textarea, select, input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+        
+        textarea:focus, select:focus, input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(45deg, #5a6fd8, #6a4190);
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        #result {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 15px;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            display: none;
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .success {
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            border-color: #28a745;
+            color: #155724;
+        }
+        
+        .error {
+            background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+            border-color: #dc3545;
+            color: #721c24;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .live-badge {
+            background: #28a745;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin-left: 10px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌐 Translation API <span class="live-badge">LIVE</span></h1>
+        
+        <div class="api-info">
+            <strong>🚀 Live API Endpoints:</strong>
+            <ul>
+                <li><code>GET /</code> - API information</li>
+                <li><code>GET /languages</code> - Get supported languages (20 languages)</li>
+                <li><code>POST /translate</code> - Translate text</li>
+            </ul>
+            <strong>🔗 API Base URL:</strong> <code>https://translation-app-nine.vercel.app</code>
+        </div>
+        
+        <form id="translation-form">
+            <div class="form-group">
+                <label for="text">✍️ Text to Translate:</label>
+                <textarea id="text" rows="4" required placeholder="Enter text to translate..." maxlength="1000"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="target_language">🎯 Target Language:</label>
+                <select id="target_language" required>
+                    <option value="">-- Select Language --</option>
+                    <option value="es">🇪🇸 Spanish (es)</option>
+                    <option value="fr">🇫🇷 French (fr)</option>
+                    <option value="de">🇩🇪 German (de)</option>
+                    <option value="ja">🇯🇵 Japanese (ja)</option>
+                    <option value="zh">🇨🇳 Chinese (zh)</option>
+                    <option value="ru">🇷🇺 Russian (ru)</option>
+                    <option value="ar">🇸🇦 Arabic (ar)</option>
+                    <option value="hi">🇮🇳 Hindi (hi)</option>
+                    <option value="pt">🇵🇹 Portuguese (pt)</option>
+                    <option value="it">🇮🇹 Italian (it)</option>
+                </select>
+            </div>
+            
+            <div class="button-group">
+                <button type="submit" class="btn-primary">🚀 Translate</button>
+                <button type="button" id="test-api" class="btn-secondary">🔍 Test API</button>
+            </div>
+        </form>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        // Fixed API URL for production
+        const API_BASE_URL = 'https://translation-app-nine.vercel.app';
+
+        // Test API connectivity
+        document.getElementById('test-api').addEventListener('click', async function() {
+            const resultDiv = document.getElementById('result');
+            
+            this.innerHTML = '<span class="loading"></span>Testing API...';
+            this.disabled = true;
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult(`✅ API Test Successful!\n\n${JSON.stringify(data, null, 2)}`, 'success');
+                } else {
+                    showResult(`❌ API Test Failed: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                showResult(`❌ Connection Error: ${error.message}`, 'error');
+            } finally {
+                this.innerHTML = '🔍 Test API';
+                this.disabled = false;
+            }
+        });
+
+        // Translation form submission
+        document.getElementById('translation-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const text = document.getElementById('text').value.trim();
+            const targetLanguage = document.getElementById('target_language').value;
+            const submitBtn = this.querySelector('button[type="submit"]');
+            
+            // Validation
+            if (!text) {
+                showResult('❌ Please enter text to translate', 'error');
+                return;
+            }
+            
+            if (!targetLanguage) {
+                showResult('❌ Please select a target language', 'error');
+                return;
+            }
+            
+            // Show loading state
+            submitBtn.innerHTML = '<span class="loading"></span>Translating...';
+            submitBtn.disabled = true;
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/translate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        text: text,
+                        target_language: targetLanguage
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    const targetLang = data.data.target_language;
+                    const sourceLang = data.data.source_language;
+                    
+                    const result = `✅ Translation Successful!
+
+📝 Original Text: ${data.data.original_text}
+
+🌐 Translated Text: ${data.data.translated_text}
+
+🎯 Target Language: ${targetLang.name} (${targetLang.code})
+🔍 Source Language: ${sourceLang.name} (${sourceLang.code})
+🎗️ Confidence: ${(data.data.confidence * 100).toFixed(1)}%
+🔧 Service: ${data.data.service}
+
+⏰ Timestamp: ${new Date().toLocaleString()}`;
+                    
+                    showResult(result, 'success');
+                } else {
+                    showResult(`❌ Translation Error: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                showResult(`❌ Network Error: ${error.message}`, 'error');
+            } finally {
+                submitBtn.innerHTML = '🚀 Translate';
+                submitBtn.disabled = false;
+            }
+        });
+
+        function showResult(message, type) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.className = type;
+            resultDiv.textContent = message;
+            resultDiv.style.display = 'block';
+            resultDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Test API on page load
+        window.addEventListener('load', function() {
+            document.getElementById('test-api').click();
+        });
+    </script>
+</body>
+</html>
