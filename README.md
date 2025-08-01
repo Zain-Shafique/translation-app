@@ -5,4 +5,4 @@ https://zain-shafique.github.io/translation-app-frontend/
 https://translation-app-nine.vercel.app/
 
 ## Test case Results:
-https://github.com/Zain-Shafique/translation-app/tree/main/Outputs
+https://github.com/Zain-Shafique/translation-app/tree/main/Results
